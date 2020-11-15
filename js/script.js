@@ -1,4 +1,4 @@
-//element targets
+//Element targets
 const form = document.querySelector('form');
 const name = document.querySelector('#name');
 const email = document.querySelector('#mail');
@@ -12,19 +12,25 @@ const checkboxes = document.querySelectorAll('.activities input');
 const payment = document.querySelector('#payment');
 const payOpts = document.querySelectorAll('#payment option')
 const creditCard = document.querySelector('#credit-card')
+const ccNumber = document.querySelector('#cc-num');
+const zip = document.querySelector('#zip');
+const cvv = document.querySelector('#cvv');
 const paypal = document.querySelector('#paypal');
 const bitcoin = document.querySelector('#bitcoin');
 
-//focus on the Name input field by default
+//Focus on the Name input field by default
 const focus = document.querySelector('#name').focus();
 
 //hide certain fields by deafult
 other.style.display='none';
 shirtDiv.hidden = 'true';
+creditCard.hidden = 'true';
 paypal.hidden = 'true';
 bitcoin.hidden = 'true';
 
-//Creates and appends the 'Please Select' option
+
+
+//Creates and appends the 'Please Select' option in T-Shirt colors
 const option = document.createElement('option');
 option.text = "Please select a design.";
 option.value = 'default';
@@ -42,25 +48,111 @@ total.textContent = `Total Activity Cost: $${cost}`;
 activities.appendChild(total);
 
 //FORM VALIDATORS
+//Checks name against a regex and informs the user if the name is invalid
 const nameValidate = () => {
     const nameValue = name.value;
-    if (nameValue.length > 0) {
+    const validName = (name) => {
+        return /^[a-z ]+$/i.test(name);
+    }
+    if (validName(nameValue) === true) {
         return true;
     } else {
+        let span = document.createElement('span');
+        span.textContent = '* Please enter a valid name.'
+        name.insertAdjacentElement('beforebegin', span)
         name.style.borderColor = 'red';
+        span.style.color = 'red';
+        return false;
     }
 }
 
+//Checks email against a regex and informs user if email is invalid
 const emailValidate = () => {
     const emailValue = email.value;
-    const atIndex = emailValue.indexOf('@');
-    const dotIndex = emailValue.indexOf('.');
-
-    if (atIndex > 1 && dotIndex > atIndex +1) {
+    const validMail = (email) => {
+        return /^[A-Za-z0-9_]+@[a-z]+.[a-z]+$/.test(emailValue);
+    }
+    if (validMail(emailValue) === true) {
         return true;
     } else {
+        let span = document.createElement('span');
+        span.textContent = '* Please enter a valid e-mail.'
+        email.insertAdjacentElement('beforebegin', span)
         email.style.borderColor = 'red';
+        span.style.color = 'red';
+        return false;
     }
+}
+
+//Adds a red span telling the user to selct activities if none are selected
+const activityValidate = () => {
+    for (let i = 0; i < checkboxes.length; i++) {
+        if(checkboxes[i].checked){
+            return true;
+        }
+    }
+    let span = document.createElement('span');
+    span.textContent = '* Please select your activities.';
+    activities.insertAdjacentElement('afterbegin', span);
+    span.style.color = 'red';
+}
+
+//Validates card number and notfies user if invalid
+const ccNumValidate = () => {
+    const ccValue = ccNumber.value;
+    const validCC = (num) => {
+        return /^[0-9]{13, 16}$/.test(num);
+    }
+    if(validCC(ccValue) === true) {
+        return true;
+    } else {
+        let span = document.createElement('span');
+        span.textContent = '* Enter a valid Credit Card Number.'
+        ccNumber.insertAdjacentElement('afterend', span)
+        ccNumber.style.borderColor = 'red';
+        span.style.color = 'red';
+    }
+}
+
+//Validates zip and notifies user if invalid
+const zipValidate = () => {
+    const zipValue = zip.value;
+    const validZip = (num) => {
+        return /^[0-9]{5}$/.test(num);
+    }
+    if(validZip(zipValue) === true) {
+        return true;
+    } else {
+        let span = document.createElement('span');
+        span.textContent = '* Invalid Zip.';
+        zip.insertAdjacentElement('afterend', span)
+        zip.style.borderColor = 'red';
+        span.style.color = 'red';
+    }
+}
+
+//Validates CVV and notifies user if invalid
+const cvvValidate = () => {
+    const cvvValue = cvv.value;
+    const validCvv = (num) => {
+        return /^[0-9]{3}$/.test(num);
+    }
+    if(validCvv(cvvValue) === true) {
+        return true;
+    } else {
+        let span = document.createElement('span');
+        span.textContent = '* Invalid CVV.';
+        cvv.insertAdjacentElement('afterend', span)
+        cvv.style.borderColor = 'red';
+        span.style.color = 'red';
+    }
+}
+
+//Wraps all card validators into a single function
+const cardValid = () => {
+    ccNumValidate();
+    zipValidate();
+    cvvValidate();
 }
 
 //EVENT LISTENERS
@@ -125,7 +217,7 @@ activities.addEventListener('change', (e) => {
 
 })
 
-//Hides or reveal a given section the payment field
+//Hides or reveals a given section the payment field
 payment.addEventListener('change', (e) => {
     const choice = e.target;
     const payType = choice.value;
@@ -149,8 +241,17 @@ payment.addEventListener('change', (e) => {
 
 })
 
+//Runs all validators upon form submission and prevents submission if one or more validations fail
 form.addEventListener('submit', (e) => {
-    e.preventDefault();
     nameValidate();
     emailValidate();
+    activityValidate();
+    if (payment.value === 'credit card') {
+        cardValid();
+    }
+    if (nameValidate() === true && emailValidate() === true && activityValidate() === true && cardValid() === true) {
+        console.log('Form submitted');
+    } else {
+        e.preventDefault();
+    }
 })
