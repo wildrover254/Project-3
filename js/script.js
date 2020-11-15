@@ -24,10 +24,10 @@ const focus = document.querySelector('#name').focus();
 //hide certain fields by deafult
 other.style.display='none';
 shirtDiv.hidden = 'true';
-creditCard.hidden = 'true';
+//creditCard.hidden = 'true';
 paypal.hidden = 'true';
 bitcoin.hidden = 'true';
-
+payment.selectedIndex = 1;
 
 
 //Creates and appends the 'Please Select' option in T-Shirt colors
@@ -233,7 +233,7 @@ payment.addEventListener('change', (e) => {
         creditCard.hidden = 'true';
         paypal.hidden = 'true';
         bitcoin.removeAttribute('hidden');
-    } else {
+    } else if (payType === 'select method') {
         creditCard.hidden = 'true';
         paypal.hidden = 'true';
         bitcoin.hidden = 'true';
