@@ -24,7 +24,6 @@ const focus = document.querySelector('#name').focus();
 //hide certain fields by deafult
 other.style.display='none';
 shirtDiv.hidden = 'true';
-//creditCard.hidden = 'true';
 paypal.hidden = 'true';
 bitcoin.hidden = 'true';
 payment.selectedIndex = 1;
@@ -47,6 +46,35 @@ let cost = 0;
 total.textContent = `Total Activity Cost: $${cost}`;
 activities.appendChild(total);
 
+//Creates spans used for validation errors
+const nameErr = document.createElement('span');
+nameErr.textContent = '';
+name.insertAdjacentElement('beforebegin', nameErr);
+
+const mailErr = document.createElement('span');
+mailErr.textContent = '';
+email.insertAdjacentElement('beforebegin', mailErr);
+
+const actErr = document.createElement('span');
+actErr.textContent = '';
+activities.insertAdjacentElement('afterbegin', actErr);
+
+const cardErr = document.createElement('span');
+cardErr.textContent = '';
+ccNumber.insertAdjacentElement('afterend', cardErr);
+
+const zipErr = document.createElement('span');
+zipErr.textContent = '';
+zip.insertAdjacentElement('afterend', zipErr);
+
+const cvvErr = document.createElement('span');
+cvvErr.textContent = '';
+cvv.insertAdjacentElement('afterend', cvvErr);
+
+const payErr = document.createElement('span');
+payErr.textContent = '';
+payment.insertAdjacentElement('afterend', payErr);
+
 //FORM VALIDATORS
 //Checks name against a regex and informs the user if the name is invalid
 const nameValidate = () => {
@@ -55,13 +83,13 @@ const nameValidate = () => {
         return /^[a-z ]+$/i.test(name);
     }
     if (validName(nameValue) === true) {
+        nameErr.textContent = '';
+        name.style.borderColor = '#6f9ddc';
         return true;
     } else {
-        let span = document.createElement('span');
-        span.textContent = '* Please enter a valid name.'
-        name.insertAdjacentElement('beforebegin', span)
+        nameErr.textContent = '* Please enter your name.'
+        nameErr.style.color = 'red';
         name.style.borderColor = 'red';
-        span.style.color = 'red';
         return false;
     }
 }
@@ -73,13 +101,13 @@ const emailValidate = () => {
         return /^[A-Za-z0-9_]+@[a-z]+.[a-z]+$/.test(emailValue);
     }
     if (validMail(emailValue) === true) {
+        mailErr.textContent ='';
+        email.style.borderColor = '#6f9ddc';
         return true;
     } else {
-        let span = document.createElement('span');
-        span.textContent = '* Please enter a valid e-mail.'
-        email.insertAdjacentElement('beforebegin', span)
+        mailErr.textContent = '* Please enter a valid email.'
+        mailErr.style.color = 'red';
         email.style.borderColor = 'red';
-        span.style.color = 'red';
         return false;
     }
 }
@@ -88,29 +116,31 @@ const emailValidate = () => {
 const activityValidate = () => {
     for (let i = 0; i < checkboxes.length; i++) {
         if(checkboxes[i].checked){
+            actErr.textContent = '';
             return true;
         }
     }
-    let span = document.createElement('span');
-    span.textContent = '* Please select your activities.';
-    activities.insertAdjacentElement('afterbegin', span);
-    span.style.color = 'red';
+    actErr.textContent = '* Please select your activities.';
+    actErr.style.color = 'red';
+    return false;
 }
 
 //Validates card number and notfies user if invalid
 const ccNumValidate = () => {
-    const ccValue = ccNumber.value;
+    const ccValue = parseInt(ccNumber.value);
+    console.log(ccValue);
     const validCC = (num) => {
-        return /^[0-9]{13, 16}$/.test(num);
+        return /^\d{13}(\d{3})?$/.test(num);
     }
     if(validCC(ccValue) === true) {
+        cardErr.textContent = '';
+        ccNumber.style.borderColor = '#6f9ddc';
         return true;
     } else {
-        let span = document.createElement('span');
-        span.textContent = '* Enter a valid Credit Card Number.'
-        ccNumber.insertAdjacentElement('afterend', span)
+        cardErr.textContent = '* Invalid card number';
+        cardErr.style.color = 'red';
         ccNumber.style.borderColor = 'red';
-        span.style.color = 'red';
+        return false;
     }
 }
 
@@ -121,13 +151,14 @@ const zipValidate = () => {
         return /^[0-9]{5}$/.test(num);
     }
     if(validZip(zipValue) === true) {
+        zipErr.textContent = '';
+        zip.style.borderColor = '#6f9ddc';
         return true;
     } else {
-        let span = document.createElement('span');
-        span.textContent = '* Invalid Zip.';
-        zip.insertAdjacentElement('afterend', span)
+        zipErr.textContent = '* Invalid zip';
+        zipErr.style.color = 'red';
         zip.style.borderColor = 'red';
-        span.style.color = 'red';
+        return false;
     }
 }
 
@@ -138,21 +169,28 @@ const cvvValidate = () => {
         return /^[0-9]{3}$/.test(num);
     }
     if(validCvv(cvvValue) === true) {
+        cvvErr.textContent = '';
+        cvv.style.borderColor = '#6f9ddc';
         return true;
     } else {
-        let span = document.createElement('span');
-        span.textContent = '* Invalid CVV.';
-        cvv.insertAdjacentElement('afterend', span)
+        cvvErr.textContent = '* Invalid CVV';
+        cvvErr.style.color = 'red';
         cvv.style.borderColor = 'red';
-        span.style.color = 'red';
+        return false;
     }
 }
 
-//Wraps all card validators into a single function
-const cardValid = () => {
-    ccNumValidate();
-    zipValidate();
-    cvvValidate();
+const payValidate = () => {
+    if (payment.value !== 'select method') {
+        payErr.textContent = '';
+        payment.style.borderColor = '#6f9ddc';
+        return true;
+    } else {
+        payErr.textContent = ' * Select a payment method'
+        payErr.style.color = 'red';
+        payment.style.borderColor = 'red';
+        return false;
+    }
 }
 
 //EVENT LISTENERS
@@ -196,7 +234,9 @@ disables conflicting activities*/
 activities.addEventListener('change', (e) => {
     const clickedBox = e.target;
     const dataCost = parseInt(clickedBox.getAttribute('data-cost'));
-    const dataTime = clickedBox.getAttribute('data-day-and-time')
+    const dataTime = clickedBox.getAttribute('data-day-and-time');
+    const boxLabels = document.querySelectorAll('.activities label');
+
     if (clickedBox.checked) {
         cost += dataCost;
         total.textContent = `Total Activity Cost: $${cost}`;
@@ -209,8 +249,10 @@ activities.addEventListener('change', (e) => {
             if(dataTime === boxType && clickedBox !== checkboxes[i]) {
                 if(clickedBox.checked) {
                     checkboxes[i].disabled = true;
+                    boxLabels[i].style.color = 'grey';
                 } else {
                     checkboxes[i].disabled = false;
+                    boxLabels[i].style.color = 'black';
                 }
             }
     }
@@ -242,16 +284,36 @@ payment.addEventListener('change', (e) => {
 })
 
 //Runs all validators upon form submission and prevents submission if one or more validations fail
-form.addEventListener('submit', (e) => {
-    nameValidate();
-    emailValidate();
-    activityValidate();
-    if (payment.value === 'credit card') {
-        cardValid();
-    }
-    if (nameValidate() === true && emailValidate() === true && activityValidate() === true && cardValid() === true) {
-        console.log('Form submitted');
-    } else {
+form.addEventListener('submit', (e) => {   
+        nameValidate();
+        emailValidate();
+        activityValidate();
+        payValidate(); 
+        if (payment.value === 'credit card') {
+            ccNumValidate();
+            zipValidate();
+            cvvValidate();
+        }
+    if (!nameValidate()) {
+        e.preventDefault();
+    } 
+    if (!emailValidate()) {
+        e.preventDefault();
+    } 
+    if (!activityValidate()) {
+        e.preventDefault();
+    } 
+    if (!payValidate()) {
+        e.preventDefault();
+    } 
+    if (!ccNumValidate()) {
         e.preventDefault();
     }
+    if (!zipValidate()) {
+        e.preventDefault();
+    }
+    if (!cvvValidate()) {
+        e.preventDefault();
+    }
+    
 })
