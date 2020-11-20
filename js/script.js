@@ -127,10 +127,10 @@ const activityValidate = () => {
 
 //Validates card number and notfies user if invalid
 const ccNumValidate = () => {
-    const ccValue = parseInt(ccNumber.value);
+    const ccValue = ccNumber.value;
     console.log(ccValue);
     const validCC = (num) => {
-        return /^\d{13}(\d{3})?$/.test(num);
+        return /^\d{13,16}$/.test(num);
     }
     if(validCC(ccValue) === true) {
         cardErr.textContent = '';
@@ -285,15 +285,7 @@ payment.addEventListener('change', (e) => {
 
 //Runs all validators upon form submission and prevents submission if one or more validations fail
 form.addEventListener('submit', (e) => {   
-        nameValidate();
-        emailValidate();
-        activityValidate();
-        payValidate(); 
-        if (payment.value === 'credit card') {
-            ccNumValidate();
-            zipValidate();
-            cvvValidate();
-        }
+        
     if (!nameValidate()) {
         e.preventDefault();
     } 
@@ -306,14 +298,17 @@ form.addEventListener('submit', (e) => {
     if (!payValidate()) {
         e.preventDefault();
     } 
-    if (!ccNumValidate()) {
-        e.preventDefault();
-    }
-    if (!zipValidate()) {
-        e.preventDefault();
-    }
-    if (!cvvValidate()) {
-        e.preventDefault();
-    }
     
+    if (payment.value === 'credit card') {
+        
+        if (!ccNumValidate()) {
+            e.preventDefault();
+        }
+        if (!zipValidate()) {
+            e.preventDefault();
+        }
+        if (!cvvValidate()) {
+            e.preventDefault();
+        }
+    }
 })
